@@ -2,7 +2,7 @@
 
 Train an AI agent to play Super Mario Bros using Deep Q-Learning (DQN).
 
-Based on the [PyTorch tutorial](https://pytorch.org/tutorials/intermediate/mario_rl_tutorial.html) with automatic checkpoint resumption and Apple Silicon support.
+**Note:** This repository is adapted from the [PyTorch official MadMario tutorial](https://pytorch.org/tutorials/intermediate/mario_rl_tutorial.html) for learning purposes only.
 
 ## Quick Start
 
@@ -61,4 +61,15 @@ The DQN algorithm in [agent.py](agent.py):
 3. Compute target: r + γ·max Q(s',a') using target network
 4. Minimize loss via backpropagation
 5. Periodically sync online → target network
+
+## Resources
+
+- [Original PyTorch MadMario Tutorial](https://pytorch.org/tutorials/intermediate/mario_rl_tutorial.html)
+- [DQN Paper](https://www.nature.com/articles/nature14236) - Mnih et al., Nature 2015
+- [Double DQN](https://arxiv.org/abs/1509.06461) - van Hasselt et al., 2015
+- [OpenAI Spinning Up](https://spinningup.openai.com/en/latest/)
+
+## License
+
+For educational purposes only. Original tutorial and code by PyTorch.
 
