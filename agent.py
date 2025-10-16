@@ -82,9 +82,11 @@ class Mario:
 
         # EXPLOIT
         else:
-            state = torch.FloatTensor(state).to(self.device)
-            state = state.unsqueeze(0)
-            action_values = self.net(state, model='online')
+            # Convert to numpy array first for efficiency
+            state_array = np.array(state)
+            state_tensor = torch.from_numpy(state_array).float().to(self.device)
+            state_tensor = state_tensor.unsqueeze(0)
+            action_values = self.net(state_tensor, model='online')
             action_idx = torch.argmax(action_values, axis=1).item()
 
         # decrease exploration_rate
@@ -106,11 +108,15 @@ class Mario:
         reward (float),
         done(bool))
         """
-        state = torch.FloatTensor(state).to(self.device)
-        next_state = torch.FloatTensor(next_state).to(self.device)
-        action = torch.LongTensor([action]).to(self.device)
-        reward = torch.FloatTensor([reward]).to(self.device)  # Use FloatTensor for MPS compatibility
-        done = torch.BoolTensor([done]).to(self.device)
+        # Convert to numpy first, then to tensor for efficiency
+        state_array = np.array(state)
+        next_state_array = np.array(next_state)
+
+        state = torch.from_numpy(state_array).float().to(self.device)
+        next_state = torch.from_numpy(next_state_array).float().to(self.device)
+        action = torch.tensor([action], dtype=torch.long, device=self.device)
+        reward = torch.tensor([reward], dtype=torch.float, device=self.device)
+        done = torch.tensor([done], dtype=torch.bool, device=self.device)
 
         self.memory.append( (state, next_state, action, reward, done,) )
 
