@@ -6,6 +6,14 @@ Train an AI agent to play Super Mario Bros using Deep Q-Learning (DQN).
 
 ## Quick Start
 
+**Requirements:** Python 3.8-3.11 (nes_py not compatible with Python 3.12+)
+
+If using Python 3.12+, create a new environment:
+```bash
+mamba create -n mario python=3.11
+mamba activate mario
+```
+
 ```bash
 # Install dependencies
 pip install -r requirements.txt
