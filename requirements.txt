@@ -1,0 +1,29 @@
+# MadMario Dependencies - for use with uv or pip
+# Install with: uv pip install -r requirements.txt
+
+# Core dependencies
+numpy
+cloudpickle
+future
+
+# RL Environment
+gymnasium>=0.29.0
+gym-super-mario-bros
+nes-py
+
+# Image processing
+opencv-python
+pillow
+pyglet<=1.5.21
+scikit-image
+
+# Scientific computing
+scipy
+
+# Deep Learning
+torch
+torchvision
+
+# Utilities
+tqdm
+matplotlib
