@@ -109,7 +109,7 @@ class Mario:
         state = torch.FloatTensor(state).to(self.device)
         next_state = torch.FloatTensor(next_state).to(self.device)
         action = torch.LongTensor([action]).to(self.device)
-        reward = torch.DoubleTensor([reward]).to(self.device)
+        reward = torch.FloatTensor([reward]).to(self.device)  # Use FloatTensor for MPS compatibility
         done = torch.BoolTensor([done]).to(self.device)
 
         self.memory.append( (state, next_state, action, reward, done,) )
