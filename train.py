@@ -19,7 +19,7 @@ from nes_py.wrappers import JoypadSpace
 
 from metrics import MetricLogger
 from agent import Mario
-from wrappers import ResizeObservation, SkipFrame
+from wrappers import ResizeObservation, SkipFrame, RewardShaping
 
 
 # ============================================================================
@@ -39,6 +39,7 @@ env = JoypadSpace(
 
 # Apply preprocessing wrappers to make learning more efficient
 env = SkipFrame(env, skip=4)              # Process every 4th frame
+env = RewardShaping(env)                  # Add reward shaping for faster learning
 env = GrayScaleObservation(env, keep_dim=False)  # Convert to grayscale
 env = ResizeObservation(env, shape=84)     # Resize to 84x84
 env = FrameStack(env, num_stack=4)         # Stack 4 frames together

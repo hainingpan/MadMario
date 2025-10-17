@@ -38,3 +38,48 @@ class SkipFrame(gym.Wrapper):
             if done:
                 break
         return obs, total_reward, done, info
+
+
+class RewardShaping(gym.Wrapper):
+    """
+    Reward shaping to make learning faster:
+    - Reward for moving right (progress)
+    - Penalty for dying
+    - Bonus for reaching flag
+    """
+    def __init__(self, env):
+        super().__init__(env)
+        self._current_x = 0
+        self._max_x = 0
+
+    def reset(self, **kwargs):
+        self._current_x = 0
+        self._max_x = 0
+        return self.env.reset(**kwargs)
+
+    def step(self, action):
+        obs, reward, done, info = self.env.step(action)
+
+        # Track Mario's x position
+        new_x = info.get('x_pos', 0)
+
+        # Reward for moving right (exploration bonus)
+        if new_x > self._max_x:
+            reward += (new_x - self._max_x) / 10.0  # Small bonus for progress
+            self._max_x = new_x
+
+        # Penalty for moving backward
+        if new_x < self._current_x - 5:
+            reward -= 1
+
+        self._current_x = new_x
+
+        # Big penalty for dying
+        if done and not info.get('flag_get', False):
+            reward -= 50
+
+        # Big bonus for reaching flag
+        if info.get('flag_get', False):
+            reward += 500
+
+        return obs, reward, done, info
