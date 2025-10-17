@@ -24,25 +24,20 @@ class Mario:
     def __init__(self, state_dim, action_dim, save_dir, checkpoint=None):
         self.state_dim = state_dim
         self.action_dim = action_dim
-        # OPTIMIZED for A100 40GB: 10x larger replay buffer for better experience diversity
-        self.memory = deque(maxlen=1000000)
-        # OPTIMIZED for A100 40GB: 16x larger batch size to fully utilize GPU
+        self.memory = deque(maxlen=150000)
         self.batch_size = 512
 
         self.exploration_rate = 1
-        # Slower decay to ensure enough exploration with larger batch sizes
         self.exploration_rate_decay = 0.9999995
         self.exploration_rate_min = 0.1
-        # CRITICAL FIX: 0.99 instead of 0.9 for long-term planning (200+ step episodes)
         self.gamma = 0.99
 
         self.curr_step = 0
-        self.burnin = 1e5  # min. experiences before training
-        # OPTIMIZED: Learn every step (was 3) - A100 can handle it!
-        self.learn_every = 1   # no. of experiences between updates to Q_online
-        self.sync_every = 1e4   # no. of experiences between Q_target & Q_online sync
+        self.burnin = 1e5
+        self.learn_every = 1
+        self.sync_every = 1e4
 
-        self.save_every = 5e5   # no. of experiences between saving Mario Net
+        self.save_every = 5e5
         self.save_dir = save_dir
 
         # Device selection: CUDA > MPS > CPU
@@ -58,36 +53,28 @@ class Mario:
 
         print(f"Using device: {self.device}")
 
-        # Print GPU info if using CUDA
         if torch.cuda.is_available():
             gpu_name = torch.cuda.get_device_name(0)
             gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9
             print(f"GPU: {gpu_name} ({gpu_memory:.1f} GB)")
             print(f"CUDA Version: {torch.version.cuda}")
-            # Enable TF32 for A100 (faster matmul operations)
             torch.backends.cuda.matmul.allow_tf32 = True
             torch.backends.cudnn.allow_tf32 = True
-            print("TF32 enabled for faster training on A100")
+            print("TF32 enabled for faster training")
 
-        # Mario's DNN to predict the most optimal action - we implement this in the Learn section
         self.net = MarioNet(self.state_dim, self.action_dim).float()
         self.net = self.net.to(self.device)
 
-        # OPTIMIZED: Lower learning rate for stability with larger batches
         self.learning_rate = 0.0001
         self.optimizer = torch.optim.Adam(self.net.parameters(), lr=self.learning_rate)
         self.loss_fn = torch.nn.SmoothL1Loss()
-
-        # Gradient clipping for training stability
         self.max_grad_norm = 10.0
 
-        # Load checkpoint AFTER initializing optimizer so we can restore optimizer state
         if checkpoint:
             self.load(checkpoint)
 
-        # Print hyperparameter summary
         print("\n" + "="*60)
-        print("HYPERPARAMETERS (Optimized for A100 40GB)")
+        print("HYPERPARAMETERS")
         print("="*60)
         print(f"Replay Buffer Size:      {self.memory.maxlen:,}")
         print(f"Batch Size:              {self.batch_size}")
@@ -116,18 +103,15 @@ class Mario:
 
         # EXPLOIT
         else:
-            # Convert to numpy array first for efficiency
             state_array = np.array(state)
             state_tensor = torch.from_numpy(state_array).float().to(self.device)
             state_tensor = state_tensor.unsqueeze(0)
             action_values = self.net(state_tensor, model='online')
             action_idx = torch.argmax(action_values, axis=1).item()
 
-        # decrease exploration_rate
         self.exploration_rate *= self.exploration_rate_decay
         self.exploration_rate = max(self.exploration_rate_min, self.exploration_rate)
 
-        # increment step
         self.curr_step += 1
         return action_idx
 
@@ -142,7 +126,6 @@ class Mario:
         reward (float),
         done(bool))
         """
-        # Convert to numpy first, then to tensor for efficiency
         state_array = np.array(state)
         next_state_array = np.array(next_state)
 
@@ -165,7 +148,7 @@ class Mario:
 
 
     def td_estimate(self, state, action):
-        current_Q = self.net(state, model='online')[np.arange(0, self.batch_size), action] # Q_online(s,a)
+        current_Q = self.net(state, model='online')[np.arange(0, self.batch_size), action]
         return current_Q
 
 
@@ -177,11 +160,10 @@ class Mario:
         return (reward + (1 - done.float()) * self.gamma * next_Q).float()
 
 
-    def update_Q_online(self, td_estimate, td_target) :
+    def update_Q_online(self, td_estimate, td_target):
         loss = self.loss_fn(td_estimate, td_target)
         self.optimizer.zero_grad()
         loss.backward()
-        # Gradient clipping for stability
         torch.nn.utils.clip_grad_norm_(self.net.parameters(), self.max_grad_norm)
         self.optimizer.step()
         return loss.item()
