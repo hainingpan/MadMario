@@ -16,14 +16,14 @@ from gym.wrappers import FrameStack, GrayScaleObservation
 from nes_py.wrappers import JoypadSpace
 from agent import Mario
 from wrappers import ResizeObservation, SkipFrame
-from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
+from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, COMPLEX_MOVEMENT
 
 print("🍄 Watch Pre-trained Mario Play 🍄\n")
 
 # ============================================================================
 # PLAYBACK SPEED CONTROL
 # ============================================================================
-FRAME_DELAY = 0.01  # Seconds to pause between frames
+FRAME_DELAY = 0.02  # Seconds to pause between frames
                     # 0.01 = very fast
                     # 0.03 = comfortable viewing (RECOMMENDED)
                     # 0.05 = slow, easy to see details
@@ -34,6 +34,8 @@ FRAME_DELAY = 0.01  # Seconds to pause between frames
 # ============================================================================
 env = gym_super_mario_bros.make('SuperMarioBros-1-1-v0')
 env = JoypadSpace(env, [['right'], ['right', 'A']])
+# env = JoypadSpace(env, SIMPLE_MOVEMENT)
+# env = JoypadSpace(env, COMPLEX_MOVEMENT)
 env = SkipFrame(env, skip=4)
 env = GrayScaleObservation(env, keep_dim=False)
 env = ResizeObservation(env, shape=84)
@@ -44,6 +46,9 @@ env = FrameStack(env, num_stack=4)
 # ============================================================================
 # checkpoint = Path('mario_trained.chkpt')
 checkpoint = Path('mario_net_latest-1-1.chkpt')
+# checkpoint = Path('mario_net_latest_optimal.chkpt')
+# checkpoint = Path('mario_net_latest_full.chkpt')
+# checkpoint = Path('mario_net_latest_all.chkpt')
 save_dir = Path('checkpoints') / 'watch'
 save_dir.mkdir(parents=True, exist_ok=True)
 
