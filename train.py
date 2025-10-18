@@ -20,21 +20,23 @@ from nes_py.wrappers import JoypadSpace
 from metrics import MetricLogger
 from agent import Mario
 from wrappers import ResizeObservation, SkipFrame, RewardShaping
+from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 
 
 # ============================================================================
 # STEP 1: ENVIRONMENT SETUP
 # ============================================================================
 # Initialize Super Mario Bros environment
-env = gym_super_mario_bros.make('SuperMarioBros-1-1-v0')
+env = gym_super_mario_bros.make('SuperMarioBros-8-1-v0')
 
 # Limit the action space to just 2 actions:
 #   0. walk right
 #   1. jump right
 env = JoypadSpace(
     env,
-    [['right'],
-    ['right', 'A']]
+    # [['right'],
+    # ['right', 'A']]
+    SIMPLE_MOVEMENT
 )
 
 # Apply preprocessing wrappers to make learning more efficient

@@ -16,6 +16,7 @@ from gym.wrappers import FrameStack, GrayScaleObservation
 from nes_py.wrappers import JoypadSpace
 from agent import Mario
 from wrappers import ResizeObservation, SkipFrame
+from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 
 print("🍄 Watch Pre-trained Mario Play 🍄\n")
 
@@ -31,7 +32,7 @@ FRAME_DELAY = 0.01  # Seconds to pause between frames
 # ============================================================================
 # ENVIRONMENT SETUP (Same as training)
 # ============================================================================
-env = gym_super_mario_bros.make('SuperMarioBros-1-1-v0')
+env = gym_super_mario_bros.make('SuperMarioBros-8-1-v0')
 env = JoypadSpace(env, [['right'], ['right', 'A']])
 env = SkipFrame(env, skip=4)
 env = GrayScaleObservation(env, keep_dim=False)
@@ -41,7 +42,8 @@ env = FrameStack(env, num_stack=4)
 # ============================================================================
 # LOAD PRE-TRAINED MODEL
 # ============================================================================
-checkpoint = Path('mario_trained.chkpt')
+# checkpoint = Path('mario_trained.chkpt')
+checkpoint = Path('mario_net_latest.chkpt')
 save_dir = Path('checkpoints') / 'watch'
 save_dir.mkdir(parents=True, exist_ok=True)
 
@@ -53,7 +55,7 @@ if not checkpoint.exists():
     exit(1)
 
 mario = Mario(state_dim=(4, 84, 84), action_dim=env.action_space.n, save_dir=save_dir, checkpoint=checkpoint)
-
+mario.exploration_rate=0.0
 print(f"✓ Loaded pre-trained model (exploration_rate={mario.exploration_rate:.4f})")
 print(f"✓ Frame delay: {FRAME_DELAY} seconds")
 print(f"\nA game window should open showing Mario playing!")
@@ -62,7 +64,7 @@ print(f"Playing episodes... Close window or press Ctrl+C to stop.\n")
 # ============================================================================
 # PLAY EPISODES
 # ============================================================================
-num_episodes = 10
+num_episodes = 20
 successful_episodes = 0
 
 for episode in range(num_episodes):
