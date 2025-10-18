@@ -34,9 +34,9 @@ env = gym_super_mario_bros.make('SuperMarioBros-1-1-v0')
 #   1. jump right
 env = JoypadSpace(
     env,
-    # [['right'],
-    # ['right', 'A']]
-    SIMPLE_MOVEMENT
+    [['right'],
+    ['right', 'A']]
+    # SIMPLE_MOVEMENT
 )
 
 # Apply preprocessing wrappers to make learning more efficient
