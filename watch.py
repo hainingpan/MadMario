@@ -32,7 +32,7 @@ FRAME_DELAY = 0.01  # Seconds to pause between frames
 # ============================================================================
 # ENVIRONMENT SETUP (Same as training)
 # ============================================================================
-env = gym_super_mario_bros.make('SuperMarioBros-8-1-v0')
+env = gym_super_mario_bros.make('SuperMarioBros-1-1-v0')
 env = JoypadSpace(env, [['right'], ['right', 'A']])
 env = SkipFrame(env, skip=4)
 env = GrayScaleObservation(env, keep_dim=False)
@@ -43,7 +43,7 @@ env = FrameStack(env, num_stack=4)
 # LOAD PRE-TRAINED MODEL
 # ============================================================================
 # checkpoint = Path('mario_trained.chkpt')
-checkpoint = Path('mario_net_latest.chkpt')
+checkpoint = Path('mario_net_latest-1-1.chkpt')
 save_dir = Path('checkpoints') / 'watch'
 save_dir.mkdir(parents=True, exist_ok=True)
 
